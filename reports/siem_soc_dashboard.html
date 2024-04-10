@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TraceGuard SIEM - SOC Incident Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #080c14;
+            --bg-surface: #0f172a;
+            --bg-card: #1e293b;
+            --border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --cyan: #06b6d4;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --emerald: #10b981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, sans-serif;
+            padding: 2rem 1rem;
+        }
+        .container { max-width: 1160px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .brand { display: flex; align-items: center; gap: 0.85rem; }
+        .brand-icon {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 1.3rem; color: #fff;
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+        }
+        .brand h1 { font-size: 1.45rem; font-weight: 700; }
+        .brand p { font-size: 0.8rem; color: var(--text-secondary); }
+        .soc-meta { text-align: right; font-size: 0.85rem; color: var(--text-secondary); }
+        .soc-meta strong { color: var(--text-primary); }
+
+        /* Metric Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        @media (max-width: 768px) {
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        .metric-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            display: flex; flex-direction: column;
+        }
+        .metric-val { font-size: 2.1rem; font-weight: 800; line-height: 1.1; }
+        .metric-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); margin-top: 0.35rem; }
+
+        /* MITRE ATT&CK Matrix Panel */
+        .card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .card-header {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .mitre-tags-flex {
+            display: flex; flex-wrap: wrap; gap: 0.75rem;
+        }
+        .mitre-tag {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.4rem 0.75rem;
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .mitre-id { color: #38bdf8; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .mitre-count { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border-radius: 4px; padding: 0.1rem 0.35rem; font-size: 0.75rem; font-weight: 700; }
+
+        /* Alert Cards */
+        .alert-card {
+            background: var(--bg-card);
+            border-left: 4px solid var(--border);
+            border-radius: 0 10px 10px 0;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .alert-card:has(.badge-critical) { border-left-color: var(--red); }
+        .alert-card:has(.badge-high) { border-left-color: #f97316; }
+        .alert-card:has(.badge-medium) { border-left-color: var(--amber); }
+        .alert-card:has(.badge-low) { border-left-color: #3b82f6; }
+
+        .alert-top {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;
+        }
+        .alert-title { font-size: 1.1rem; font-weight: 600; }
+        .alert-id { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-secondary); }
+        .alert-time { font-size: 0.85rem; color: var(--text-secondary); }
+
+        .alert-meta-bar {
+            display: flex; flex-wrap: wrap; gap: 1.5rem;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-bottom: 0.85rem;
+        }
+        .alert-meta-bar span { color: var(--text-secondary); }
+        .tag-mitre { color: #f59e0b; font-weight: 600; }
+
+        .alert-desc { font-size: 0.95rem; color: #cbd5e1; margin-bottom: 1rem; line-height: 1.5; }
+
+        /* Evidence */
+        .evidence-box {
+            background: #090d16;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+        }
+        .ev-title { font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.4rem; }
+        .evidence-box pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #93c5fd;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* Playbooks */
+        .playbook-box {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+        }
+        .pb-title { font-size: 0.85rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+        .cmd-box {
+            background: #000;
+            border-radius: 6px;
+            padding: 0.6rem 0.85rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #34d399;
+            margin-bottom: 0.75rem;
+            border: 1px solid #1e293b;
+        }
+        .pb-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+        }
+        @media (max-width: 650px) {
+            .pb-grid { grid-template-columns: 1fr; }
+        }
+        .pb-grid ul { margin-left: 1.2rem; margin-top: 0.25rem; color: #cbd5e1; }
+        .compliance-tag {
+            font-size: 0.8rem; color: #fde047; border-top: 1px solid rgba(51, 65, 85, 0.5); padding-top: 0.5rem;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block; padding: 0.2rem 0.5rem; border-radius: 4px;
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+        }
+        .badge-critical { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .badge-high { background: rgba(249, 115, 22, 0.2); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.4); }
+        .badge-medium { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .badge-low { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+
+        footer {
+            text-align: center; font-size: 0.8rem; color: var(--text-secondary);
+            margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="brand">
+                <div class="brand-icon">TG</div>
+                <div>
+                    <h1>TraceGuard SIEM Dashboard</h1>
+                    <p>Security Information & Event Management & MITRE ATT&CK Correlator</p>
+                </div>
+            </div>
+            <div class="soc-meta">
+                <div>Session: <strong>Enterprise Intrusion & Cyber Kill Chain Simulation</strong></div>
+                <div>Processed: <strong>19 logs</strong> (0.009s)</div>
+                <div>Timestamp: <strong>2026-10-29 10:08:44 UTC</strong></div>
+            </div>
+        </header>
+
+        <!-- Metric Grid -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-val" style="color: var(--red);">1</div>
+                <div class="metric-label">Critical Incidents</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-val" style="color: #f97316;">2</div>
+                <div class="metric-label">High Severity Alerts</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-val" style="color: #38bdf8;">3</div>
+                <div class="metric-label">Active Threat Hosts</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-val" style="color: var(--emerald);">19</div>
+                <div class="metric-label">Normalized Logs</div>
+            </div>
+        </div>
+
+        <!-- MITRE ATT&CK Matrix Panel -->
+        <div class="card">
+            <div class="card-header">Observed Adversary Tactics & Techniques (Certiport Domain 5.2)</div>
+            <div class="mitre-tags-flex">
+                
+        <div class="mitre-tag">
+            <span class="mitre-id">T1110</span>
+            <span class="mitre-name">Brute Force</span>
+            <span class="mitre-count">x1</span>
+        </div>
+        
+        <div class="mitre-tag">
+            <span class="mitre-id">T1083</span>
+            <span class="mitre-name">File and Directory Discovery</span>
+            <span class="mitre-count">x1</span>
+        </div>
+        
+        <div class="mitre-tag">
+            <span class="mitre-id">T1078</span>
+            <span class="mitre-name">Valid Accounts</span>
+            <span class="mitre-count">x1</span>
+        </div>
+        
+        <div class="mitre-tag">
+            <span class="mitre-id">T1046</span>
+            <span class="mitre-name">Network Service Discovery</span>
+            <span class="mitre-count">x1</span>
+        </div>
+        
+            </div>
+        </div>
+
+        <!-- Incidents Feed -->
+        <div class="card">
+            <div class="card-header">Security Incident Queue & Automated Playbooks (4 Alerts)</div>
+            
+        <div class="alert-card">
+            <div class="alert-top">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span class="badge badge-critical">CRITICAL</span>
+                    <span class="alert-id">TG-ALERT-0001</span>
+                    <h3 class="alert-title">Automated Credential Brute-Force Attack</h3>
+                </div>
+                <div class="alert-time">2026-10-29 02:12:22 UTC</div>
+            </div>
+            
+            <div class="alert-meta-bar">
+                <div><span>Attacker IP:</span> <strong>198.51.100.77</strong></div>
+                <div><span>Target Entity:</span> <strong>webuser</strong></div>
+                <div><span>Events Correlated:</span> <strong>7</strong></div>
+                <div><span>MITRE TTP:</span> <span class="tag-mitre">T1110 (Credential Access)</span></div>
+            </div>
+
+            <p class="alert-desc">Detected 7 failed authentication attempts from IP 198.51.100.77 targeting user(s) webuser, test, ubuntu, admin, root. [!] CRITICAL: Followed by a successful login! Account likely compromised.</p>
+            
+            <div class="evidence-box">
+                <div class="ev-title">Raw Log Evidence (Forensic Artifact):</div>
+                <pre>Oct 29 02:12:10 auth-server sshd[14012]: Failed password for invalid user root from 198.51.100.77 port 48912 ssh2\nOct 29 02:12:12 auth-server sshd[14015]: Failed password for invalid user admin from 198.51.100.77 port 48914 ssh2\nOct 29 02:12:14 auth-server sshd[14018]: Failed password for invalid user ubuntu from 198.51.100.77 port 48916 ssh2</pre>
+            </div>
+            
+            
+            <div class="playbook-box">
+                <div class="pb-title">NIST SP 800-61 Incident Playbook: Containment & Eradication</div>
+                <div class="cmd-box">
+                    <code>sudo iptables -A INPUT -s 198.51.100.77 -j DROP  # (Windows: netsh advfirewall firewall add rule name="TraceGuard_Block_198.51.100.77" dir=in action=block remoteip=198.51.100.77)</code>
+                </div>
+                <div class="pb-grid">
+                    <div>
+                        <strong>Containment Actions:</strong>
+                        <ul>
+                            <li>Immediately block incoming connections from IP 198.51.100.77 at network border firewall.</li><li>Temporarily lock or enforce password reset for targeted account 'webuser'.</li><li>Verify fail2ban or SSH rate-limiting policies are operating.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong>Eradication & Recovery:</strong>
+                        <ul>
+                            <li>Inspect auth.log for any successful logins from this IP during the same timeframe.</li><li>Revoke any active SSH sessions or OAuth tokens associated with the account.</li><li>Enforce Multi-Factor Authentication (MFA) on all remote access endpoints.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="compliance-tag">
+                    <strong>Regulatory Impact:</strong> PCI-DSS 8.1.6 (Account lockout after repeated attempts) & 10.2 (Audit log monitoring).
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="alert-card">
+            <div class="alert-top">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span class="badge badge-high">HIGH</span>
+                    <span class="alert-id">TG-ALERT-0003</span>
+                    <h3 class="alert-title">Directory Traversal / Arbitrary File Read</h3>
+                </div>
+                <div class="alert-time">2026-10-29 02:15:22 UTC</div>
+            </div>
+            
+            <div class="alert-meta-bar">
+                <div><span>Attacker IP:</span> <strong>198.51.100.88</strong></div>
+                <div><span>Target Entity:</span> <strong>www-data</strong></div>
+                <div><span>Events Correlated:</span> <strong>2</strong></div>
+                <div><span>MITRE TTP:</span> <span class="tag-mitre">T1083 (Discovery)</span></div>
+            </div>
+
+            <p class="alert-desc">Detected 2 directory traversal probes attempt to read sensitive system files (e.g. /etc/passwd).</p>
+            
+            <div class="evidence-box">
+                <div class="ev-title">Raw Log Evidence (Forensic Artifact):</div>
+                <pre>198.51.100.88 - - [29/Oct/2026:02:15:18 +0000] "GET /download.php?file=../../../../etc/passwd HTTP/1.1" 200 1850 "-" "Mozilla/5.0"\n198.51.100.88 - - [29/Oct/2026:02:15:22 +0000] "GET /view.php?page=../../../../etc/shadow HTTP/1.1" 403 280 "-" "Mozilla/5.0"</pre>
+            </div>
+            
+            
+            <div class="playbook-box">
+                <div class="pb-title">NIST SP 800-61 Incident Playbook: Containment & Eradication</div>
+                <div class="cmd-box">
+                    <code>sudo iptables -A INPUT -s 198.51.100.88 -j DROP  # (Windows: netsh advfirewall firewall add rule name="TraceGuard_Block_198.51.100.88" dir=in action=block remoteip=198.51.100.88)</code>
+                </div>
+                <div class="pb-grid">
+                    <div>
+                        <strong>Containment Actions:</strong>
+                        <ul>
+                            <li>Blacklist 198.51.100.88 at the Web Application Firewall (WAF) or reverse proxy layer.</li><li>Isolate affected web application instances from sensitive internal backend database segments.</li><li>Capture live packet traces and preserve raw HTTP access logs for digital forensics.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong>Eradication & Recovery:</strong>
+                        <ul>
+                            <li>Audit web server code and sanitize input parameters (apply prepared statements / parameterized queries).</li><li>Verify web directory permissions to ensure read-only status for non-upload paths.</li><li>Scan filesystem for newly dropped webshells or modified scripts.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="compliance-tag">
+                    <strong>Regulatory Impact:</strong> GDPR Article 33 (Assess potential personal data breach within 72 hours) & PCI-DSS 6.5 (Prevent common web vulnerabilities).
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="alert-card">
+            <div class="alert-top">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span class="badge badge-high">HIGH</span>
+                    <span class="alert-id">TG-ALERT-0004</span>
+                    <h3 class="alert-title">Suspicious Administrative Privilege Escalation</h3>
+                </div>
+                <div class="alert-time">2026-10-29 02:18:05 UTC</div>
+            </div>
+            
+            <div class="alert-meta-bar">
+                <div><span>Attacker IP:</span> <strong>127.0.0.1</strong></div>
+                <div><span>Target Entity:</span> <strong>webuser</strong></div>
+                <div><span>Events Correlated:</span> <strong>1</strong></div>
+                <div><span>MITRE TTP:</span> <span class="tag-mitre">T1078 (Privilege Escalation)</span></div>
+            </div>
+
+            <p class="alert-desc">User 'webuser' executed high-risk command via sudo: '/bin/bash'.</p>
+            
+            <div class="evidence-box">
+                <div class="ev-title">Raw Log Evidence (Forensic Artifact):</div>
+                <pre>Oct 29 02:18:05 auth-server sudo: webuser : TTY=pts/1 ; PWD=/home/webuser ; USER=root ; COMMAND=/bin/bash</pre>
+            </div>
+            
+            
+            <div class="playbook-box">
+                <div class="pb-title">NIST SP 800-61 Incident Playbook: Containment & Eradication</div>
+                <div class="cmd-box">
+                    <code>sudo usermod -L webuser ; sudo pkill -u webuser</code>
+                </div>
+                <div class="pb-grid">
+                    <div>
+                        <strong>Containment Actions:</strong>
+                        <ul>
+                            <li>Suspend user account 'webuser' immediately and terminate active shell sessions (`pkill -u webuser`).</li><li>Freeze endpoint state or snapshot virtual machine to preserve volatile memory evidence.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong>Eradication & Recovery:</strong>
+                        <ul>
+                            <li>Audit /etc/sudoers file for unauthorized NOPASSWD entries or modified permissions.</li><li>Inspect user bash history (.bash_history) and recently modified files in /tmp and /var/tmp.</li><li>Check cron jobs (`/etc/cron*`) and systemd services for persistence mechanisms.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="compliance-tag">
+                    <strong>Regulatory Impact:</strong> HIPAA Security Rule 164.312 (Audit Controls) & GDPR Article 32 (Security of processing).
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="alert-card">
+            <div class="alert-top">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span class="badge badge-medium">MEDIUM</span>
+                    <span class="alert-id">TG-ALERT-0002</span>
+                    <h3 class="alert-title">Network Service Discovery / Port Reconnaissance</h3>
+                </div>
+                <div class="alert-time">2026-10-29 02:10:06 UTC</div>
+            </div>
+            
+            <div class="alert-meta-bar">
+                <div><span>Attacker IP:</span> <strong>203.0.113.55</strong></div>
+                <div><span>Target Entity:</span> <strong>network</strong></div>
+                <div><span>Events Correlated:</span> <strong>6</strong></div>
+                <div><span>MITRE TTP:</span> <span class="tag-mitre">T1046 (Discovery)</span></div>
+            </div>
+
+            <p class="alert-desc">Host 203.0.113.55 performed horizontal/vertical port sweep across 6 destination ports (21, 22, 80, 443, 3306, 8080).</p>
+            
+            <div class="evidence-box">
+                <div class="ev-title">Raw Log Evidence (Forensic Artifact):</div>
+                <pre>Oct 29 02:10:01 edge-gateway kernel: [UFW BLOCK] IN=eth0 OUT= SRC=203.0.113.55 DST=10.0.0.5 PROTO=TCP DPT=21\nOct 29 02:10:02 edge-gateway kernel: [UFW BLOCK] IN=eth0 OUT= SRC=203.0.113.55 DST=10.0.0.5 PROTO=TCP DPT=22\nOct 29 02:10:03 edge-gateway kernel: [UFW BLOCK] IN=eth0 OUT= SRC=203.0.113.55 DST=10.0.0.5 PROTO=TCP DPT=80</pre>
+            </div>
+            
+            
+            <div class="playbook-box">
+                <div class="pb-title">NIST SP 800-61 Incident Playbook: Containment & Eradication</div>
+                <div class="cmd-box">
+                    <code>sudo iptables -A INPUT -s 203.0.113.55 -j DROP  # (Windows: netsh advfirewall firewall add rule name="TraceGuard_Block_203.0.113.55" dir=in action=block remoteip=203.0.113.55)</code>
+                </div>
+                <div class="pb-grid">
+                    <div>
+                        <strong>Containment Actions:</strong>
+                        <ul>
+                            <li>Drop all traffic from reconnaissance host 203.0.113.55.</li><li>Verify external firewall rules drop unsolicited SYN probes without responding with RST packets.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong>Eradication & Recovery:</strong>
+                        <ul>
+                            <li>Audit perimeter network to verify no unneeded management ports are exposed.</li><li>Check IDS/IPS signature databases to ensure automated blacklisting is synchronized.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="compliance-tag">
+                    <strong>Regulatory Impact:</strong> SOC 2 & ISO 27001 Perimeter Defense & Attack Surface Management controls.
+                </div>
+            </div>
+            
+        </div>
+        
+        </div>
+
+        <footer>
+            TraceGuard SIEM v1.0.0 • Aligned with Certiport IT Specialist: Cybersecurity Exam Objectives (Domains 1, 3, 5).
+        </footer>
+    </div>
+</body>
+</html>

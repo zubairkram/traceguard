@@ -1,0 +1,157 @@
+{
+  "session_title": "Enterprise Intrusion & Cyber Kill Chain Simulation",
+  "run_timestamp": "2026-10-29 10:08:44 UTC",
+  "total_logs_processed": 19,
+  "duration_seconds": 0.009,
+  "alerts": [
+    {
+      "alert_id": "TG-ALERT-0001",
+      "title": "Automated Credential Brute-Force Attack",
+      "severity": "CRITICAL",
+      "timestamp": "2026-10-29 02:12:22 UTC",
+      "source_ip": "198.51.100.77",
+      "target_user": "webuser",
+      "event_count": 7,
+      "mitre_tactic": "Credential Access",
+      "mitre_technique_id": "T1110",
+      "mitre_technique_name": "Brute Force: Password Guessing",
+      "description": "Detected 7 failed authentication attempts from IP 198.51.100.77 targeting user(s) webuser, test, ubuntu, admin, root. [!] CRITICAL: Followed by a successful login! Account likely compromised.",
+      "evidence_samples": [
+        "Oct 29 02:12:10 auth-server sshd[14012]: Failed password for invalid user root from 198.51.100.77 port 48912 ssh2",
+        "Oct 29 02:12:12 auth-server sshd[14015]: Failed password for invalid user admin from 198.51.100.77 port 48914 ssh2",
+        "Oct 29 02:12:14 auth-server sshd[14018]: Failed password for invalid user ubuntu from 198.51.100.77 port 48916 ssh2"
+      ],
+      "playbook": {
+        "detection_summary": "Automated credential brute-force attack detected from source 198.51.100.77 targeting account 'webuser'.",
+        "containment_actions": [
+          "Immediately block incoming connections from IP 198.51.100.77 at network border firewall.",
+          "Temporarily lock or enforce password reset for targeted account 'webuser'.",
+          "Verify fail2ban or SSH rate-limiting policies are operating."
+        ],
+        "containment_command": "sudo iptables -A INPUT -s 198.51.100.77 -j DROP  # (Windows: netsh advfirewall firewall add rule name=\"TraceGuard_Block_198.51.100.77\" dir=in action=block remoteip=198.51.100.77)",
+        "eradication_steps": [
+          "Inspect auth.log for any successful logins from this IP during the same timeframe.",
+          "Revoke any active SSH sessions or OAuth tokens associated with the account.",
+          "Enforce Multi-Factor Authentication (MFA) on all remote access endpoints."
+        ],
+        "recovery_steps": [
+          "Restore account access after user identity verification.",
+          "Verify host integrity and review system process lists for unauthorized background daemons.",
+          "Monitor auth logs for secondary attack waves."
+        ],
+        "compliance_impact": "PCI-DSS 8.1.6 (Account lockout after repeated attempts) & 10.2 (Audit log monitoring)."
+      }
+    },
+    {
+      "alert_id": "TG-ALERT-0003",
+      "title": "Directory Traversal / Arbitrary File Read",
+      "severity": "HIGH",
+      "timestamp": "2026-10-29 02:15:22 UTC",
+      "source_ip": "198.51.100.88",
+      "target_user": "www-data",
+      "event_count": 2,
+      "mitre_tactic": "Discovery",
+      "mitre_technique_id": "T1083",
+      "mitre_technique_name": "File and Directory Discovery",
+      "description": "Detected 2 directory traversal probes attempt to read sensitive system files (e.g. /etc/passwd).",
+      "evidence_samples": [
+        "198.51.100.88 - - [29/Oct/2026:02:15:18 +0000] \"GET /download.php?file=../../../../etc/passwd HTTP/1.1\" 200 1850 \"-\" \"Mozilla/5.0\"",
+        "198.51.100.88 - - [29/Oct/2026:02:15:22 +0000] \"GET /view.php?page=../../../../etc/shadow HTTP/1.1\" 403 280 \"-\" \"Mozilla/5.0\""
+      ],
+      "playbook": {
+        "detection_summary": "Web application exploit attempt (SQL Injection / Directory Traversal) originating from 198.51.100.88.",
+        "containment_actions": [
+          "Blacklist 198.51.100.88 at the Web Application Firewall (WAF) or reverse proxy layer.",
+          "Isolate affected web application instances from sensitive internal backend database segments.",
+          "Capture live packet traces and preserve raw HTTP access logs for digital forensics."
+        ],
+        "containment_command": "sudo iptables -A INPUT -s 198.51.100.88 -j DROP  # (Windows: netsh advfirewall firewall add rule name=\"TraceGuard_Block_198.51.100.88\" dir=in action=block remoteip=198.51.100.88)",
+        "eradication_steps": [
+          "Audit web server code and sanitize input parameters (apply prepared statements / parameterized queries).",
+          "Verify web directory permissions to ensure read-only status for non-upload paths.",
+          "Scan filesystem for newly dropped webshells or modified scripts."
+        ],
+        "recovery_steps": [
+          "Deploy patched application code to production.",
+          "Conduct regression testing and automated vulnerability scan via VigilScan.",
+          "Re-enable public web routing through WAF."
+        ],
+        "compliance_impact": "GDPR Article 33 (Assess potential personal data breach within 72 hours) & PCI-DSS 6.5 (Prevent common web vulnerabilities)."
+      }
+    },
+    {
+      "alert_id": "TG-ALERT-0004",
+      "title": "Suspicious Administrative Privilege Escalation",
+      "severity": "HIGH",
+      "timestamp": "2026-10-29 02:18:05 UTC",
+      "source_ip": "127.0.0.1",
+      "target_user": "webuser",
+      "event_count": 1,
+      "mitre_tactic": "Privilege Escalation",
+      "mitre_technique_id": "T1078",
+      "mitre_technique_name": "Valid Accounts: Privilege Escalation",
+      "description": "User 'webuser' executed high-risk command via sudo: '/bin/bash'.",
+      "evidence_samples": [
+        "Oct 29 02:18:05 auth-server sudo: webuser : TTY=pts/1 ; PWD=/home/webuser ; USER=root ; COMMAND=/bin/bash"
+      ],
+      "playbook": {
+        "detection_summary": "Unauthorized privilege escalation or off-hours sudo execution detected by user 'webuser'.",
+        "containment_actions": [
+          "Suspend user account 'webuser' immediately and terminate active shell sessions (`pkill -u webuser`).",
+          "Freeze endpoint state or snapshot virtual machine to preserve volatile memory evidence."
+        ],
+        "containment_command": "sudo usermod -L webuser ; sudo pkill -u webuser",
+        "eradication_steps": [
+          "Audit /etc/sudoers file for unauthorized NOPASSWD entries or modified permissions.",
+          "Inspect user bash history (.bash_history) and recently modified files in /tmp and /var/tmp.",
+          "Check cron jobs (`/etc/cron*`) and systemd services for persistence mechanisms."
+        ],
+        "recovery_steps": [
+          "Re-image compromised host if root compromise is confirmed.",
+          "Re-issue all SSH keys and administrative credentials.",
+          "Perform formal Post-Incident Review (Lessons Learned) within 5 business days."
+        ],
+        "compliance_impact": "HIPAA Security Rule 164.312 (Audit Controls) & GDPR Article 32 (Security of processing)."
+      }
+    },
+    {
+      "alert_id": "TG-ALERT-0002",
+      "title": "Network Service Discovery / Port Reconnaissance",
+      "severity": "MEDIUM",
+      "timestamp": "2026-10-29 02:10:06 UTC",
+      "source_ip": "203.0.113.55",
+      "target_user": "network",
+      "event_count": 6,
+      "mitre_tactic": "Discovery",
+      "mitre_technique_id": "T1046",
+      "mitre_technique_name": "Network Service Discovery",
+      "description": "Host 203.0.113.55 performed horizontal/vertical port sweep across 6 destination ports (21, 22, 80, 443, 3306, 8080).",
+      "evidence_samples": [
+        "Oct 29 02:10:01 edge-gateway kernel: [UFW BLOCK] IN=eth0 OUT= SRC=203.0.113.55 DST=10.0.0.5 PROTO=TCP DPT=21",
+        "Oct 29 02:10:02 edge-gateway kernel: [UFW BLOCK] IN=eth0 OUT= SRC=203.0.113.55 DST=10.0.0.5 PROTO=TCP DPT=22",
+        "Oct 29 02:10:03 edge-gateway kernel: [UFW BLOCK] IN=eth0 OUT= SRC=203.0.113.55 DST=10.0.0.5 PROTO=TCP DPT=80"
+      ],
+      "playbook": {
+        "detection_summary": "Reconnaissance port scanning activity detected from IP 203.0.113.55.",
+        "containment_actions": [
+          "Drop all traffic from reconnaissance host 203.0.113.55.",
+          "Verify external firewall rules drop unsolicited SYN probes without responding with RST packets."
+        ],
+        "containment_command": "sudo iptables -A INPUT -s 203.0.113.55 -j DROP  # (Windows: netsh advfirewall firewall add rule name=\"TraceGuard_Block_203.0.113.55\" dir=in action=block remoteip=203.0.113.55)",
+        "eradication_steps": [
+          "Audit perimeter network to verify no unneeded management ports are exposed.",
+          "Check IDS/IPS signature databases to ensure automated blacklisting is synchronized."
+        ],
+        "recovery_steps": [
+          "Continue passive telemetry monitoring for correlation with subsequent exploit attempts.",
+          "Log scanning source IP into threat intelligence sharing feed."
+        ],
+        "compliance_impact": "SOC 2 & ISO 27001 Perimeter Defense & Attack Surface Management controls."
+      }
+    }
+  ],
+  "source_ips_seen": 3,
+  "top_threat_actors": [],
+  "mitre_breakdown": {},
+  "severity_breakdown": {}
+}

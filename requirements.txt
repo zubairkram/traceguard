@@ -1,0 +1,8 @@
+# TraceGuard SIEM requires ZERO external dependencies!
+# Built 100% on Python standard library modules:
+# - re
+# - datetime
+# - json
+# - collections
+# - dataclasses
+# - argparse
