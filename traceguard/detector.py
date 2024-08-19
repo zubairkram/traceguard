@@ -1,8 +1,6 @@
 """
 Threat detection and correlation engine.
-Directly implements:
-- Certiport Domain 5.1: Monitoring security events & anomaly detection
-- Certiport Domain 5.2: MITRE ATT&CK Matrix mapping & Cyber Kill Chain
+Correlates security events against MITRE ATT&CK Matrix TTPs and attack thresholds.
 """
 
 from collections import defaultdict

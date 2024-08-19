@@ -1,7 +1,6 @@
 """
 NIST SP 800-61 Incident Response Playbooks & Compliance Triggers.
-Directly implements Certiport Domain 5.4 (Incident Response Lifecycle)
-and Domain 5.3 (Compliance Frameworks: GDPR, PCI-DSS, HIPAA).
+Generates containment commands and compliance breach notifications.
 """
 
 from typing import Dict, Any, List
