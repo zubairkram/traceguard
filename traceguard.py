@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
 TraceGuard SIEM - Lightweight Security Information & Event Management
-CLI Entrypoint.
-Aligned with Certiport IT Specialist: Cybersecurity Exam Objectives (Domains 1, 3, 5).
+CLI Entrypoint for Threat Hunting, Anomaly Detection & Incident Response.
 """
 
 import sys

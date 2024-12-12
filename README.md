@@ -1,29 +1,27 @@
 # TraceGuard SIEM 🚨
 ### Lightweight Security Information & Event Management & Threat Detection Engine
-> **Directly Aligned with Certiport IT Specialist: Cybersecurity Exam Objectives (Domains 1, 3, 5)**
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
 [![Dependencies: Zero](https://img.shields.io/badge/dependencies-0%20(Standard%20Library)-success.svg)]()
 [![Tests: 8 Passed](https://img.shields.io/badge/tests-8%2F8%20passed-brightgreen.svg)]()
-[![Certiport Aligned](https://img.shields.io/badge/Certiport-IT%20Specialist-orange.svg)]()
+[![MITRE ATT&CK](https://img.shields.io/badge/MITRE%20ATT%26CK-v14%20Mapped-orange.svg)]()
 
 **TraceGuard SIEM** is a lightweight, high-speed Security Information and Event Management (SIEM) log parser, threat detection engine, and incident response correlator written in pure Python with **zero external dependencies**.
 
-Engineered directly around the **Certiport IT Specialist: Cybersecurity Certification Syllabus**, TraceGuard normalizes disparate raw log formats (Syslog, Linux Auth, Apache/Nginx Web, Windows JSON, and Firewall drops), maps suspicious telemetry to the **MITRE ATT&CK Matrix**, and generates actionable **NIST SP 800-61 incident response containment playbooks**.
+Engineered for Security Operations Centers (SOCs) and incident responders, TraceGuard normalizes disparate raw log formats (Syslog, Linux Auth, Apache/Nginx Web, Windows JSON, and Firewall drops), maps suspicious telemetry to the **MITRE ATT&CK Matrix**, and generates actionable **NIST SP 800-61 incident response containment playbooks**.
 
 ---
 
-## 📋 Certiport Exam Objectives Alignment
+## ⚡ Detection Engineering & Standards Mapping
 
-| Certiport Exam Objective | Syllabus Topic | TraceGuard SIEM Implementation |
+| Detection Category | Framework / Standard | TraceGuard SIEM Implementation |
 | :--- | :--- | :--- |
-| **Domain 1.2: Common Threats** | Malware, brute force, Denial of Service, insider threats, privilege escalation. | Correlates password guessing bursts, rapid port sweeps, directory traversal, and unauthorized `sudo` executions. |
-| **Domain 3.5: Interpret System Logs** | Event Viewer, audit logs, syslog, identification of anomalies. | Ingests and normalizes multi-source raw logs (Syslog, `auth.log`, Nginx/Apache Combined, and Firewall drops). |
-| **Domain 5.1: Monitor Security Events** | Role of SIEM and SOAR, identifying suspicious events as they occur. | Stateful event correlation, frequency-based rate windowing, and incident escalation queuing. |
-| **Domain 5.2: Attack Attribution & Forensics** | Cyber Kill Chain, MITRE ATT&CK Matrix, TTPs, forensic artifacts. | Maps detected threats to MITRE ATT&CK techniques (`T1110`, `T1046`, `T1190`, `T1083`, `T1078`) and preserves raw evidence artifacts. |
-| **Domain 5.3: Compliance Frameworks** | GDPR, HIPAA, PCI-DSS incident reporting requirements. | Automatically annotates security alerts with regulatory compliance notifications (e.g. GDPR 72h breach window, PCI-DSS 8.1.6 lockout). |
-| **Domain 5.4: Cybersecurity Incident Response** | NIST SP 800-61 lifecycle (Preparation, Detection, Containment, Eradication, Recovery). | Generates complete step-by-step incident response playbooks and ready-to-run firewall containment commands. |
+| **Log Normalization & Ingestion** | Syslog / Common Event Format | Ingests and normalizes multi-source raw logs (Linux `/var/log/auth.log`, Apache/Nginx Combined access, and UFW/IPTables drops). |
+| **Real-time Threat Correlation** | Stateful Event Windowing | Frequency-based rate windowing, anomalous pattern matching, and incident escalation queuing. |
+| **Adversary TTP Attribution** | MITRE ATT&CK Matrix | Maps detected threats to specific ATT&CK techniques: `T1110` (Brute Force), `T1046` (Port Reconnaissance), `T1190` (SQLi), `T1083` (Path Traversal), and `T1078` (Sudo Privilege Escalation). |
+| **Automated Incident Response** | NIST SP 800-61 Lifecycle | Generates structured playbooks for Detection, Containment, Eradication, and Recovery with copy-pasteable firewall commands (`iptables` and Windows `netsh`). |
+| **Compliance Breach Triggers** | GDPR / PCI-DSS / HIPAA | Automatically annotates security alerts with regulatory compliance notifications (e.g. GDPR 72h breach assessment window, PCI-DSS 8.1.6 account lockout). |
 
 ---
 
@@ -130,7 +128,7 @@ Total Alerts:        4 incident(s) flagged
 Unique Threat Hosts: 3 source IP(s)
 ====================================================================
 
-ACTIVE SECURITY INCIDENTS (Certiport Domain 5.1 & 5.2):
+ACTIVE SECURITY INCIDENTS & THREAT ATTRIBUTIONS:
   [CRITICAL] Automated Credential Brute-Force Attack
     Alert ID:    TG-ALERT-0001 | Time: 2026-10-29 02:12:22 UTC
     Threat Host: 198.51.100.77 (Target: webuser) | Events: 7
@@ -177,12 +175,13 @@ OK
 
 ---
 
-## 🗺️ Certiport Cybersecurity Portfolio Roadmap
+## 🗺️ Cybersecurity Portfolio Suite
 
-1. **Project 1: VigilScan** — Network Vulnerability Scanner & SSL/TLS Audit Engine *(Domains 1.4, 2.1, 2.2, 4.1, 4.2, 4.3)*
-2. **Project 2 (This Repository): TraceGuard SIEM** — Lightweight Log Analyzer & MITRE ATT&CK Threat Detector *(Domains 1.2, 3.5, 5.1, 5.2, 5.3, 5.4)*
-3. **Project 3: AuditArmor** — Endpoint Security & Host Hardening Compliance Auditor *(Domains 1.3, 3.1, 3.2, 3.3, 3.4)*
-4. **Project 4: CryptoVault-CLI** — PKI, Data-at-Rest/Transit Encryption & File Integrity Verifier *(Domains 1.1, 1.4)*
+This project is part of a 3-part open-source security tool suite:
+
+1. **[VigilScan (Python)](https://github.com/zubairkram/vigilscan)** — Network Vulnerability Scanner & SSL/TLS Audit Engine
+2. **[TraceGuard SIEM (Python)](https://github.com/zubairkram/traceguard)** — Lightweight Log Analyzer & MITRE ATT&CK Threat Detector
+3. **[TokenSentry (JavaScript)](https://github.com/zubairkram/tokensentry)** — JWT & API Security Exploitation & Auditing Toolkit
 
 ---
 

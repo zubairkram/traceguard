@@ -1,7 +1,6 @@
 """
-TraceGuard SIEM - Lightweight Security Information & Event Management (SIEM)
-Threat Detection & Incident Response Engine.
-Aligned with Certiport IT Specialist: Cybersecurity Exam Objectives (Domains 1, 3, 5).
+TraceGuard SIEM - Lightweight Security Information & Event Management
+Threat Detection, Anomaly Ingestion & Automated Incident Response Engine.
 """
 
 __version__ = "1.0.0"

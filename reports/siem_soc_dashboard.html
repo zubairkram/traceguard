@@ -208,8 +208,8 @@
             </div>
             <div class="soc-meta">
                 <div>Session: <strong>Enterprise Intrusion & Cyber Kill Chain Simulation</strong></div>
-                <div>Processed: <strong>19 logs</strong> (0.009s)</div>
-                <div>Timestamp: <strong>2026-10-29 10:08:44 UTC</strong></div>
+                <div>Processed: <strong>19 logs</strong> (0.01s)</div>
+                <div>Timestamp: <strong>2026-10-29 10:31:40 UTC</strong></div>
             </div>
         </header>
 
@@ -235,7 +235,7 @@
 
         <!-- MITRE ATT&CK Matrix Panel -->
         <div class="card">
-            <div class="card-header">Observed Adversary Tactics & Techniques (Certiport Domain 5.2)</div>
+            <div class="card-header">Observed Adversary Tactics & Techniques (MITRE ATT&CK Matrix)</div>
             <div class="mitre-tags-flex">
                 
         <div class="mitre-tag">
@@ -281,12 +281,12 @@
             
             <div class="alert-meta-bar">
                 <div><span>Attacker IP:</span> <strong>198.51.100.77</strong></div>
-                <div><span>Target Entity:</span> <strong>webuser</strong></div>
+                <div><span>Target Entity:</span> <strong>root</strong></div>
                 <div><span>Events Correlated:</span> <strong>7</strong></div>
                 <div><span>MITRE TTP:</span> <span class="tag-mitre">T1110 (Credential Access)</span></div>
             </div>
 
-            <p class="alert-desc">Detected 7 failed authentication attempts from IP 198.51.100.77 targeting user(s) webuser, test, ubuntu, admin, root. [!] CRITICAL: Followed by a successful login! Account likely compromised.</p>
+            <p class="alert-desc">Detected 7 failed authentication attempts from IP 198.51.100.77 targeting user(s) root, admin, test, ubuntu, webuser. [!] CRITICAL: Followed by a successful login! Account likely compromised.</p>
             
             <div class="evidence-box">
                 <div class="ev-title">Raw Log Evidence (Forensic Artifact):</div>
@@ -303,7 +303,7 @@
                     <div>
                         <strong>Containment Actions:</strong>
                         <ul>
-                            <li>Immediately block incoming connections from IP 198.51.100.77 at network border firewall.</li><li>Temporarily lock or enforce password reset for targeted account 'webuser'.</li><li>Verify fail2ban or SSH rate-limiting policies are operating.</li>
+                            <li>Immediately block incoming connections from IP 198.51.100.77 at network border firewall.</li><li>Temporarily lock or enforce password reset for targeted account 'root'.</li><li>Verify fail2ban or SSH rate-limiting policies are operating.</li>
                         </ul>
                     </div>
                     <div>
@@ -476,7 +476,7 @@
         </div>
 
         <footer>
-            TraceGuard SIEM v1.0.0 • Aligned with Certiport IT Specialist: Cybersecurity Exam Objectives (Domains 1, 3, 5).
+            TraceGuard SIEM v1.0.0 • Threat Intelligence & Automated Incident Response System.
         </footer>
     </div>
 </body>

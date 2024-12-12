@@ -38,7 +38,7 @@ def print_cli_banner():
     | | '__/ _` |/ __/ _ \\ | |_ | | | |/ _` | '__/ _` |
     | | | | (_| | (_|  __/ |__| | |_| | (_| | | | (_| |
     |_|_|  \\__,_|\\___\\___|\\_____|\\__,_|\\__,_|_|  \\__,_|
-{COLOR_RESET}{COLOR_GRAY} Lightweight SIEM & Threat Detection Engine | Aligned with Certiport Domains 1, 3, 5{COLOR_RESET}
+{COLOR_RESET}{COLOR_GRAY} Lightweight SIEM & Threat Detection Engine | Security Information & Event Management{COLOR_RESET}
 """
     print(banner)
 
@@ -56,7 +56,7 @@ def print_cli_summary(report: SiemReport):
         print(f"{COLOR_GREEN}[+] Clean Log Stream: Zero security threats or policy violations detected.{COLOR_RESET}\n")
         return
 
-    print(f"{COLOR_BOLD}ACTIVE SECURITY INCIDENTS (Certiport Domain 5.1 & 5.2):{COLOR_RESET}")
+    print(f"{COLOR_BOLD}ACTIVE SECURITY INCIDENTS & THREAT ATTRIBUTIONS:{COLOR_RESET}")
     for a in report.alerts:
         sev_color = COLOR_RED if a.severity in ("CRITICAL", "HIGH") else (COLOR_YELLOW if a.severity == "MEDIUM" else COLOR_BLUE)
         print(f"  {sev_color}[{a.severity}]{COLOR_RESET} {COLOR_BOLD}{a.title}{COLOR_RESET}")
@@ -415,7 +415,7 @@ def generate_html_dashboard(report: SiemReport, output_path: str):
 
         <!-- MITRE ATT&CK Matrix Panel -->
         <div class="card">
-            <div class="card-header">Observed Adversary Tactics & Techniques (Certiport Domain 5.2)</div>
+            <div class="card-header">Observed Adversary Tactics & Techniques (MITRE ATT&CK Matrix)</div>
             <div class="mitre-tags-flex">
                 {mitre_html}
             </div>
@@ -428,7 +428,7 @@ def generate_html_dashboard(report: SiemReport, output_path: str):
         </div>
 
         <footer>
-            TraceGuard SIEM v1.0.0 • Aligned with Certiport IT Specialist: Cybersecurity Exam Objectives (Domains 1, 3, 5).
+            TraceGuard SIEM v1.0.0 • Threat Intelligence & Automated Incident Response System.
         </footer>
     </div>
 </body>

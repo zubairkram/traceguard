@@ -28,7 +28,7 @@ class LogEvent:
 
 @dataclass
 class IncidentPlaybook:
-    """NIST SP 800-61 incident response playbook actions (Certiport Domain 5.4)."""
+    """NIST SP 800-61 incident response playbook actions & containment procedures."""
     detection_summary: str
     containment_actions: List[str]
     containment_command: str        # e.g., iptables / netsh block command

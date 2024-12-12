@@ -1,8 +1,8 @@
 {
   "session_title": "Enterprise Intrusion & Cyber Kill Chain Simulation",
-  "run_timestamp": "2026-10-29 10:08:44 UTC",
+  "run_timestamp": "2026-10-29 10:31:40 UTC",
   "total_logs_processed": 19,
-  "duration_seconds": 0.009,
+  "duration_seconds": 0.01,
   "alerts": [
     {
       "alert_id": "TG-ALERT-0001",
@@ -10,22 +10,22 @@
       "severity": "CRITICAL",
       "timestamp": "2026-10-29 02:12:22 UTC",
       "source_ip": "198.51.100.77",
-      "target_user": "webuser",
+      "target_user": "root",
       "event_count": 7,
       "mitre_tactic": "Credential Access",
       "mitre_technique_id": "T1110",
       "mitre_technique_name": "Brute Force: Password Guessing",
-      "description": "Detected 7 failed authentication attempts from IP 198.51.100.77 targeting user(s) webuser, test, ubuntu, admin, root. [!] CRITICAL: Followed by a successful login! Account likely compromised.",
+      "description": "Detected 7 failed authentication attempts from IP 198.51.100.77 targeting user(s) root, admin, test, ubuntu, webuser. [!] CRITICAL: Followed by a successful login! Account likely compromised.",
       "evidence_samples": [
         "Oct 29 02:12:10 auth-server sshd[14012]: Failed password for invalid user root from 198.51.100.77 port 48912 ssh2",
         "Oct 29 02:12:12 auth-server sshd[14015]: Failed password for invalid user admin from 198.51.100.77 port 48914 ssh2",
         "Oct 29 02:12:14 auth-server sshd[14018]: Failed password for invalid user ubuntu from 198.51.100.77 port 48916 ssh2"
       ],
       "playbook": {
-        "detection_summary": "Automated credential brute-force attack detected from source 198.51.100.77 targeting account 'webuser'.",
+        "detection_summary": "Automated credential brute-force attack detected from source 198.51.100.77 targeting account 'root'.",
         "containment_actions": [
           "Immediately block incoming connections from IP 198.51.100.77 at network border firewall.",
-          "Temporarily lock or enforce password reset for targeted account 'webuser'.",
+          "Temporarily lock or enforce password reset for targeted account 'root'.",
           "Verify fail2ban or SSH rate-limiting policies are operating."
         ],
         "containment_command": "sudo iptables -A INPUT -s 198.51.100.77 -j DROP  # (Windows: netsh advfirewall firewall add rule name=\"TraceGuard_Block_198.51.100.77\" dir=in action=block remoteip=198.51.100.77)",

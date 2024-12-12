@@ -1,7 +1,6 @@
 """
 Multi-format security log parser.
-Directly implements Certiport Domain 3.5: Interpret System Logs
-(Syslog, Auth logs, Web application logs, Windows audit events).
+Normalizes Syslog, Auth logs, Web application logs, and Windows audit events.
 """
 
 import re
